@@ -78,8 +78,8 @@ class MainActivity : AppCompatActivity() {
 
             // Battery ring update
             if (percent >= 0) {
-                batteryRing.setBatteryPercent(percent)
-            }
+    batteryRing.setBatteryState(percent, isCharging)
+}
 
             // Percent text color (safe)
             when {
