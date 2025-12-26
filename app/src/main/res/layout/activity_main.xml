@@ -1,77 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvPercent"
-            android:layout_width="wrap_content"
+        <!-- HEADER -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="—"
-            android:textSize="44sp"
-            android:textStyle="bold" />
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:background="#E3F2FD">
 
-        <TextView
-            android:id="@+id/tvStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Status"
-            android:textSize="16sp"
-            android:paddingTop="12dp" />
+            <TextView
+                android:id="@+id/tvPercent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="22%"
+                android:textSize="52sp"
+                android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvSource"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Source"
-            android:textSize="16sp"
-            android:paddingTop="8dp" />
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Discharging"
+                android:textSize="18sp"
+                android:paddingTop="6dp" />
 
-        <TextView
-            android:id="@+id/tvHealth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Health"
-            android:textSize="16sp"
-            android:paddingTop="8dp" />
+            <TextView
+                android:id="@+id/tvSource"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Not plugged"
+                android:textSize="16sp" />
 
-        <TextView
-            android:id="@+id/tvTemp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Temperature"
-            android:textSize="16sp"
-            android:paddingTop="8dp" />
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvVoltage"
-            android:layout_width="wrap_content"
+        <!-- DETAILS -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Voltage"
-            android:textSize="16sp"
-            android:paddingTop="8dp" />
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:layout_marginTop="16dp"
+            android:background="#F5F5F5">
 
-        <TextView
-            android:id="@+id/tvLevelScale"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Level/Scale"
-            android:textSize="14sp"
-            android:paddingTop="16dp" />
+            <TextView
+                android:id="@+id/tvHealth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Health: Good"
+                android:textSize="16sp" />
 
-        <TextView
-            android:id="@+id/tvPlugged"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Plugged"
-            android:textSize="14sp"
-            android:paddingTop="8dp" />
+            <TextView
+                android:id="@+id/tvTemp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Temperature"
+                android:textSize="16sp"
+                android:paddingTop="8dp" />
+
+            <TextView
+                android:id="@+id/tvVoltage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Voltage"
+                android:textSize="16sp"
+                android:paddingTop="8dp" />
+
+            <TextView
+                android:id="@+id/tvLevelScale"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Level"
+                android:textSize="14sp"
+                android:paddingTop="12dp" />
+
+            <TextView
+                android:id="@+id/tvPlugged"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Plugged code"
+                android:textSize="14sp"
+                android:paddingTop="4dp" />
+
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

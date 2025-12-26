@@ -34,21 +34,7 @@ class MainActivity : AppCompatActivity() {
                 status == BatteryManager.BATTERY_STATUS_CHARGING ||
                 status == BatteryManager.BATTERY_STATUS_FULL
 
-            val statusText = when (status) {
-                BatteryManager.BATTERY_STATUS_CHARGING -> "Charging"
-                BatteryManager.BATTERY_STATUS_DISCHARGING -> "Discharging"
-                BatteryManager.BATTERY_STATUS_FULL -> "Full"
-                BatteryManager.BATTERY_STATUS_NOT_CHARGING -> "Not charging"
-                else -> "Unknown"
-            }
-
             val plug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
-            val sourceText = when (plug) {
-                BatteryManager.BATTERY_PLUGGED_USB -> "USB"
-                BatteryManager.BATTERY_PLUGGED_AC -> "AC"
-                BatteryManager.BATTERY_PLUGGED_WIRELESS -> "Wireless"
-                else -> "Not plugged"
-            }
 
             val health = intent.getIntExtra(BatteryManager.EXTRA_HEALTH, -1)
             val healthText = when (health) {
@@ -57,28 +43,38 @@ class MainActivity : AppCompatActivity() {
                 BatteryManager.BATTERY_HEALTH_DEAD -> "Dead"
                 BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE -> "Over voltage"
                 BatteryManager.BATTERY_HEALTH_COLD -> "Cold"
-                BatteryManager.BATTERY_HEALTH_UNSPECIFIED_FAILURE -> "Failure"
                 else -> "Unknown"
             }
 
             val tempTenths =
                 intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Int.MIN_VALUE)
-            val tempText =
-                if (tempTenths != Int.MIN_VALUE) "${tempTenths / 10f} °C" else "Unknown"
+            val temperature =
+                if (tempTenths != Int.MIN_VALUE) tempTenths / 10f else 0f
 
-            val voltageMv =
+            val voltage =
                 intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1)
-            val voltageText =
-                if (voltageMv > 0) "$voltageMv mV" else "Unknown"
 
+            // UI updates
             tvPercent.text = if (percent >= 0) "$percent%" else "—"
-            tvStatus.text = "$statusText (charging=$isCharging)"
-            tvSource.text = sourceText
-            tvHealth.text = healthText
-            tvTemp.text = tempText
-            tvVoltage.text = voltageText
+
+            tvStatus.text =
+                if (isCharging) "Charging" else "Discharging"
+
+            tvSource.text =
+                if (plug == 0) "Not plugged" else "Plugged"
+
+            tvHealth.text = "Health: $healthText"
+            tvTemp.text = "Temperature: ${temperature} °C"
+            tvVoltage.text = "Voltage: ${voltage} mV"
             tvLevelScale.text = "Level: $level / Scale: $scale"
             tvPlugged.text = "Plugged code: $plug"
+
+            // Battery % color (safe)
+            when {
+                percent <= 15 -> tvPercent.setTextColor(0xFFD32F2F.toInt())
+                percent <= 40 -> tvPercent.setTextColor(0xFFF57C00.toInt())
+                else -> tvPercent.setTextColor(0xFF1976D2.toInt())
+            }
         }
     }
 
@@ -98,7 +94,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        registerReceiver(
+            batteryReceiver,
+            IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        )
     }
 
     override fun onStop() {
