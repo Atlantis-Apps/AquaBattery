@@ -15,8 +15,8 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="24dp"
-    android:background="#E3F2FD">
+    android:padding="28dp"
+    android:background="@drawable/bg_atlantis_gradient">
 
     <FrameLayout
         android:layout_width="220dp"
@@ -34,7 +34,8 @@
             android:layout_gravity="center"
             android:text="22%"
             android:textSize="48sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="#FFFFFF" />
 
     </FrameLayout>
 
@@ -44,6 +45,7 @@
         android:layout_height="wrap_content"
         android:text="Discharging"
         android:textSize="18sp"
+        android:textColor="#E3F2FD"
         android:paddingTop="8dp" />
 
     <TextView
@@ -51,7 +53,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Not plugged"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:textColor="#BBDEFB" />
 
 </LinearLayout>
 
