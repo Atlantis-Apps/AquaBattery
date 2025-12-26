@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvVoltage: TextView
     private lateinit var tvLevelScale: TextView
     private lateinit var tvPlugged: TextView
+    private lateinit var batteryRing: BatteryRingView
 
     private val batteryReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -54,14 +55,20 @@ class MainActivity : AppCompatActivity() {
             val voltage =
                 intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1)
 
-            // UI updates
+            // ===== UI updates =====
+
             tvPercent.text = if (percent >= 0) "$percent%" else "—"
 
             tvStatus.text =
                 if (isCharging) "Charging" else "Discharging"
 
             tvSource.text =
-                if (plug == 0) "Not plugged" else "Plugged"
+                when (plug) {
+                    BatteryManager.BATTERY_PLUGGED_USB -> "USB"
+                    BatteryManager.BATTERY_PLUGGED_AC -> "AC"
+                    BatteryManager.BATTERY_PLUGGED_WIRELESS -> "Wireless"
+                    else -> "Not plugged"
+                }
 
             tvHealth.text = "Health: $healthText"
             tvTemp.text = "Temperature: ${temperature} °C"
@@ -69,11 +76,16 @@ class MainActivity : AppCompatActivity() {
             tvLevelScale.text = "Level: $level / Scale: $scale"
             tvPlugged.text = "Plugged code: $plug"
 
-            // Battery % color (safe)
+            // Battery ring update
+            if (percent >= 0) {
+                batteryRing.setBatteryPercent(percent)
+            }
+
+            // Percent text color (safe)
             when {
-                percent <= 15 -> tvPercent.setTextColor(0xFFD32F2F.toInt())
-                percent <= 40 -> tvPercent.setTextColor(0xFFF57C00.toInt())
-                else -> tvPercent.setTextColor(0xFF1976D2.toInt())
+                percent <= 15 -> tvPercent.setTextColor(0xFFD32F2F.toInt()) // red
+                percent <= 40 -> tvPercent.setTextColor(0xFFF57C00.toInt()) // orange
+                else -> tvPercent.setTextColor(0xFF1976D2.toInt())          // blue
             }
         }
     }
@@ -90,6 +102,7 @@ class MainActivity : AppCompatActivity() {
         tvVoltage = findViewById(R.id.tvVoltage)
         tvLevelScale = findViewById(R.id.tvLevelScale)
         tvPlugged = findViewById(R.id.tvPlugged)
+        batteryRing = findViewById(R.id.batteryRing)
     }
 
     override fun onStart() {

@@ -10,37 +10,50 @@
         android:orientation="vertical">
 
         <!-- HEADER -->
-        <LinearLayout
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="#E3F2FD">
+
+    <FrameLayout
+        android:layout_width="220dp"
+        android:layout_height="220dp">
+
+        <com.atlantis.aquabattery.BatteryRingView
+            android:id="@+id/batteryRing"
             android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/tvPercent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="24dp"
-            android:background="#E3F2FD">
+            android:layout_gravity="center"
+            android:text="22%"
+            android:textSize="48sp"
+            android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/tvPercent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="22%"
-                android:textSize="52sp"
-                android:textStyle="bold" />
+    </FrameLayout>
 
-            <TextView
-                android:id="@+id/tvStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Discharging"
-                android:textSize="18sp"
-                android:paddingTop="6dp" />
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Discharging"
+        android:textSize="18sp"
+        android:paddingTop="8dp" />
 
-            <TextView
-                android:id="@+id/tvSource"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Not plugged"
-                android:textSize="16sp" />
+    <TextView
+        android:id="@+id/tvSource"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Not plugged"
+        android:textSize="16sp" />
 
-        </LinearLayout>
+</LinearLayout>
 
         <!-- DETAILS -->
         <LinearLayout
