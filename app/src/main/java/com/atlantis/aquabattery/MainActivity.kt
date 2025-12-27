@@ -15,7 +15,6 @@ import com.atlantis.aquabattery.battery.DrainEstimator
 
 class MainActivity : AppCompatActivity() {
 
-    // ===== UI =====
     private lateinit var tvPercent: TextView
     private lateinit var tvStatus: TextView
     private lateinit var tvSource: TextView
@@ -28,18 +27,15 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var batteryRing: BatteryRingView
     private lateinit var batteryGraph: BatteryGraphView
-
-    // ===== DATA =====
     private lateinit var historyStore: BatteryHistoryStore
 
-    // ===== RECEIVER =====
     private val batteryReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent == null) return
 
             val info = BatteryParser.parse(intent)
 
-            // ---- Text UI ----
+            // ===== TEXT =====
             tvPercent.text =
                 if (info.percent >= 0) "${info.percent}%" else "—"
 
@@ -47,38 +43,41 @@ class MainActivity : AppCompatActivity() {
                 if (info.isCharging) "Charging" else "Discharging"
 
             tvSource.text = info.plugType
-            tvHealth.text = "Health: ${info.health}"
-            tvTemp.text = "Temperature: ${info.temperatureC} °C"
-            tvVoltage.text = "Voltage: ${info.voltageMv} mV"
-            tvLevelScale.text = "Level: ${info.level} / ${info.scale}"
+            tvHealth.text = "Health · ${info.health}"
+            tvTemp.text = "Temp · ${info.temperatureC} °C"
+            tvVoltage.text = "Voltage · ${info.voltageMv} mV"
+            tvLevelScale.text = "Level · ${info.level} / ${info.scale}"
 
-            // ---- Ring ----
+            // ===== PERCENT COLOR =====
+            when {
+                info.percent <= 15 -> {
+                    tvPercent.setTextColor(0xFFFFCDD2.toInt()) // soft red
+                }
+                info.percent <= 40 -> {
+                    tvPercent.setTextColor(0xFFFFF3E0.toInt()) // amber
+                }
+                else -> {
+                    tvPercent.setTextColor(0xFFFFFFFF.toInt()) // white
+                }
+            }
+
+            // ===== RING =====
             if (info.percent >= 0) {
                 batteryRing.setBatteryState(info.percent, info.isCharging)
             }
 
-            // ---- History + Graph ----
+            // ===== HISTORY + GRAPH =====
             if (info.percent >= 0) {
                 historyStore.addPoint(info.percent)
                 val history = historyStore.getPoints()
                 batteryGraph.setData(history)
 
                 tvDrain.text =
-                    "Drain: ${DrainEstimator.estimate(history, info.isCharging)}"
+                    "Drain · ${DrainEstimator.estimate(history, info.isCharging)}"
             }
 
-            // ---- Charging bolt ----
+            // ===== CHARGING ANIMATION =====
             setChargingAnimation(info.isCharging)
-
-            // ---- Percent color ----
-            when {
-                info.percent <= 15 ->
-                    tvPercent.setTextColor(0xFFD32F2F.toInt())
-                info.percent <= 40 ->
-                    tvPercent.setTextColor(0xFFF57C00.toInt())
-                else ->
-                    tvPercent.setTextColor(0xFF1976D2.toInt())
-            }
         }
     }
 
@@ -86,7 +85,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // ---- Bind views ----
         tvPercent = findViewById(R.id.tvPercent)
         tvStatus = findViewById(R.id.tvStatus)
         tvSource = findViewById(R.id.tvSource)
@@ -96,6 +94,14 @@ class MainActivity : AppCompatActivity() {
         tvLevelScale = findViewById(R.id.tvLevelScale)
         tvDrain = findViewById(R.id.tvDrain)
         ivCharging = findViewById(R.id.ivCharging)
+
+        // shadow so % always pops
+        tvPercent.setShadowLayer(
+            6f,
+            0f,
+            2f,
+            0x55000000.toInt()
+        )
 
         batteryRing = findViewById(R.id.batteryRing)
         batteryGraph = findViewById(R.id.batteryGraph)
@@ -116,7 +122,6 @@ class MainActivity : AppCompatActivity() {
         unregisterReceiver(batteryReceiver)
     }
 
-    // ===== Charging bolt animation =====
     private fun setChargingAnimation(charging: Boolean) {
         if (charging) {
             if (ivCharging.visibility != View.VISIBLE) {
