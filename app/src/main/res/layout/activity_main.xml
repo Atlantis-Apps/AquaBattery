@@ -37,6 +37,15 @@
             android:textStyle="bold"
             android:textColor="#FFFFFF" />
 
+        <ImageView
+    android:id="@+id/ivCharging"
+    android:layout_width="32dp"
+    android:layout_height="32dp"
+    android:layout_gravity="center|bottom"
+    android:layout_marginBottom="36dp"
+    android:src="@drawable/ic_bolt"
+    android:visibility="gone" />
+
     </FrameLayout>
 
     <TextView

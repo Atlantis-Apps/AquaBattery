@@ -6,6 +6,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
 import android.os.Bundle
+import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
@@ -23,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var batteryRing: BatteryRingView
     private lateinit var batteryGraph: BatteryGraphView
     private lateinit var historyStore: BatteryHistoryStore
+    private lateinit var ivCharging: ImageView
 
     private val batteryReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -58,7 +62,7 @@ class MainActivity : AppCompatActivity() {
             val voltage =
                 intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1)
 
-            // ===== UI =====
+            // ===== UI TEXT =====
 
             tvPercent.text = if (percent >= 0) "$percent%" else "—"
 
@@ -90,6 +94,9 @@ class MainActivity : AppCompatActivity() {
                 batteryGraph.setData(historyStore.getPoints())
             }
 
+            // ===== Charging bolt =====
+            setChargingAnimation(isCharging)
+
             // ===== Percent color =====
             when {
                 percent <= 15 -> tvPercent.setTextColor(0xFFD32F2F.toInt())
@@ -114,6 +121,8 @@ class MainActivity : AppCompatActivity() {
 
         batteryRing = findViewById(R.id.batteryRing)
         batteryGraph = findViewById(R.id.batteryGraph)
+        ivCharging = findViewById(R.id.ivCharging)
+
         historyStore = BatteryHistoryStore(this)
     }
 
@@ -128,5 +137,34 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         unregisterReceiver(batteryReceiver)
+    }
+
+    // ===== Charging bolt animation =====
+    private fun setChargingAnimation(charging: Boolean) {
+        if (charging) {
+            if (ivCharging.visibility != View.VISIBLE) {
+                ivCharging.visibility = View.VISIBLE
+                ivCharging.alpha = 0f
+            }
+
+            ivCharging.animate().cancel()
+            ivCharging.animate()
+                .alpha(1f)
+                .setDuration(800)
+                .setInterpolator(AccelerateDecelerateInterpolator())
+                .withEndAction {
+                    ivCharging.animate()
+                        .alpha(0.3f)
+                        .setDuration(800)
+                        .withEndAction {
+                            setChargingAnimation(true)
+                        }
+                        .start()
+                }
+                .start()
+        } else {
+            ivCharging.animate().cancel()
+            ivCharging.visibility = View.GONE
+        }
     }
 }
