@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvVoltage: TextView
     private lateinit var tvLevelScale: TextView
     private lateinit var tvPlugged: TextView
+    private lateinit var tvDrain: TextView
 
     private lateinit var batteryRing: BatteryRingView
     private lateinit var batteryGraph: BatteryGraphView
@@ -62,20 +63,17 @@ class MainActivity : AppCompatActivity() {
             val voltage =
                 intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1)
 
-            // ===== UI TEXT =====
+            // ===== TEXT UI =====
 
             tvPercent.text = if (percent >= 0) "$percent%" else "—"
+            tvStatus.text = if (isCharging) "Charging" else "Discharging"
 
-            tvStatus.text =
-                if (isCharging) "Charging" else "Discharging"
-
-            tvSource.text =
-                when (plug) {
-                    BatteryManager.BATTERY_PLUGGED_USB -> "USB"
-                    BatteryManager.BATTERY_PLUGGED_AC -> "AC"
-                    BatteryManager.BATTERY_PLUGGED_WIRELESS -> "Wireless"
-                    else -> "Not plugged"
-                }
+            tvSource.text = when (plug) {
+                BatteryManager.BATTERY_PLUGGED_USB -> "USB"
+                BatteryManager.BATTERY_PLUGGED_AC -> "AC"
+                BatteryManager.BATTERY_PLUGGED_WIRELESS -> "Wireless"
+                else -> "Not plugged"
+            }
 
             tvHealth.text = "Health: $healthText"
             tvTemp.text = "Temperature: ${temperature} °C"
@@ -88,10 +86,13 @@ class MainActivity : AppCompatActivity() {
                 batteryRing.setBatteryState(percent, isCharging)
             }
 
-            // ===== Battery history =====
+            // ===== Battery history + graph =====
             if (percent >= 0) {
                 historyStore.addPoint(percent)
-                batteryGraph.setData(historyStore.getPoints())
+                val history = historyStore.getPoints()
+                batteryGraph.setData(history)
+
+                tvDrain.text = "Drain: ${calculateDrainSpeed(history, isCharging)}"
             }
 
             // ===== Charging bolt =====
@@ -118,6 +119,7 @@ class MainActivity : AppCompatActivity() {
         tvVoltage = findViewById(R.id.tvVoltage)
         tvLevelScale = findViewById(R.id.tvLevelScale)
         tvPlugged = findViewById(R.id.tvPlugged)
+        tvDrain = findViewById(R.id.tvDrain)
 
         batteryRing = findViewById(R.id.batteryRing)
         batteryGraph = findViewById(R.id.batteryGraph)
@@ -165,6 +167,33 @@ class MainActivity : AppCompatActivity() {
         } else {
             ivCharging.animate().cancel()
             ivCharging.visibility = View.GONE
+        }
+    }
+
+    // ===== Drain speed estimation =====
+    private fun calculateDrainSpeed(
+        history: List<Pair<Long, Int>>,
+        isCharging: Boolean
+    ): String {
+        if (isCharging) return "Charging"
+        if (history.size < 2) return "Calculating…"
+
+        val latest = history.last()
+        val cutoffTime = latest.first - (30 * 60 * 1000) // 30 minutes
+        val past = history.lastOrNull { it.first <= cutoffTime } ?: history.first()
+
+        val percentDiff = past.second - latest.second
+        val timeDiffMs = latest.first - past.first
+
+        if (timeDiffMs <= 0 || percentDiff <= 0) return "Stable"
+
+        val hours = timeDiffMs / (1000f * 60f * 60f)
+        val percentPerHour = percentDiff / hours
+
+        return when {
+            percentPerHour >= 15f -> "Fast drain"
+            percentPerHour >= 5f -> "Normal drain"
+            else -> "Slow drain"
         }
     }
 }

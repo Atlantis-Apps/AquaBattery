@@ -58,6 +58,14 @@
         android:paddingTop="8dp" />
 
     <TextView
+    android:id="@+id/tvDrain"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Drain speed"
+    android:textSize="16sp"
+    android:paddingTop="8dp" />
+
+    <TextView
         android:id="@+id/tvSource"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
