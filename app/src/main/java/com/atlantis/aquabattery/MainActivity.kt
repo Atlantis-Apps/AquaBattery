@@ -37,28 +37,27 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent == null || context == null) return
 
-            // ✅ IMPORTANT: context is REQUIRED
             val info = BatteryParser.parse(context, intent)
 
             // ===== PERCENT =====
             tvPercent.text =
                 if (info.percent >= 0) "${info.percent}%" else "—"
 
-            // ===== STATUS (CHARGE SPEED TEXT) =====
+            // ===== STATUS (CHARGE SPEED) =====
             tvStatus.text =
-    if (info.isCharging)
-        ChargeSpeed.label(
-            info.currentMa,
-            info.voltageMv,
-            info.plugType,
-            info.percent
-        )
-    else
-        "Discharging"
+                if (info.isCharging)
+                    ChargeSpeed.label(
+                        info.currentMa,
+                        info.voltageMv,
+                        info.plugType,
+                        info.percent
+                    )
+                else
+                    "Discharging"
 
             // ===== DETAILS =====
             tvSource.text = info.plugType
-            tvHealth.text = "Health · ${info.health}"
+            tvHealth.text = "Health · ${explainHealth(info.health)}"
             tvTemp.text = "Temp · ${info.temperatureC} °C"
             tvVoltage.text = "Voltage · ${info.voltageMv} mV"
             tvLevelScale.text = "Level · ${info.level} / ${info.scale}"
@@ -66,11 +65,11 @@ class MainActivity : AppCompatActivity() {
             // ===== PERCENT COLOR =====
             when {
                 info.percent <= 15 ->
-                    tvPercent.setTextColor(0xFFFFCDD2.toInt()) // red
+                    tvPercent.setTextColor(0xFFFFCDD2.toInt())
                 info.percent <= 40 ->
-                    tvPercent.setTextColor(0xFFFFF3E0.toInt()) // amber
+                    tvPercent.setTextColor(0xFFFFF3E0.toInt())
                 else ->
-                    tvPercent.setTextColor(0xFFFFFFFF.toInt()) // white
+                    tvPercent.setTextColor(0xFFFFFFFF.toInt())
             }
 
             // ===== RING =====
@@ -83,10 +82,8 @@ class MainActivity : AppCompatActivity() {
                 historyStore.addPoint(info.percent)
                 val history = historyStore.getPoints()
 
-                // Graph only needs %
                 batteryGraph.setData(history.map { it.second })
 
-                // Drain estimator needs timestamp + %
                 tvDrain.text =
                     "Drain · ${DrainEstimator.estimate(history, info.isCharging)}"
             }
@@ -167,6 +164,18 @@ class MainActivity : AppCompatActivity() {
         } else {
             ivCharging.animate().cancel()
             ivCharging.visibility = View.GONE
+        }
+    }
+
+    // ===== FEATURE 1: HEALTH EXPLANATION =====
+    private fun explainHealth(rawHealth: String): String {
+        return when (rawHealth) {
+            "Good" -> "Good (Normal wear)"
+            "Overheating" -> "Fair (Thermal stress)"
+            "Cold" -> "Fair (Cold conditions)"
+            "Over voltage" -> "Fair (Voltage irregularity)"
+            "Dead" -> "Poor (Consider replacement)"
+            else -> "Unknown"
         }
     }
 
