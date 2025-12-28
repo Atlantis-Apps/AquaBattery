@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.atlantis.aquabattery.battery.BatteryParser
 import com.atlantis.aquabattery.battery.DrainEstimator
+import com.atlantis.aquabattery.battery.ChargeSpeedEstimator
 import kotlin.math.max
 
 class MainActivity : AppCompatActivity() {
@@ -49,7 +50,13 @@ class MainActivity : AppCompatActivity() {
 
             // ===== STATUS =====
             tvStatus.text =
-                if (info.isCharging) "Charging" else "Discharging"
+               if (info.isCharging)
+            ChargeSpeedEstimator.label(
+            historyStore.getPoints(),
+            info.isCharging
+        )
+    else
+        "Discharging"
 
             // ===== DETAILS =====
             tvSource.text = info.plugType
