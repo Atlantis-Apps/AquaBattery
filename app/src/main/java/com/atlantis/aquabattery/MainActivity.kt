@@ -17,6 +17,7 @@ import androidx.appcompat.widget.Toolbar
 import com.atlantis.aquabattery.battery.BatteryParser
 import com.atlantis.aquabattery.battery.DrainEstimator
 import com.atlantis.aquabattery.battery.ChargeSpeedEstimator
+import com.atlantis.aquabattery.battery.TemperatureStatus
 import kotlin.math.max
 
 class MainActivity : AppCompatActivity() {
@@ -61,11 +62,24 @@ class MainActivity : AppCompatActivity() {
             // ===== DETAILS =====
             tvSource.text = info.plugType
             tvHealth.text = "Health · ${explainHealth(info.health)}"
-            tvTemp.text = "Temp · ${info.temperatureC} °C"
-            tvVoltage.text = "Voltage · ${info.voltageMv} mV"
-            tvLevelScale.text = "Level · ${info.level} / ${info.scale}"
 
-            // ===== LAST UPDATED (Feature 2) =====
+           // Temperature label + color
+          val tempLabel = TemperatureStatus.label(info.temperatureC)
+          tvTemp.text = "Temp · ${info.temperatureC} °C ($tempLabel)"
+
+         when (tempLabel) {
+           "Hot ⚠️" ->
+              tvTemp.setTextColor(0xFFFFCDD2.toInt())
+           "Warm" ->
+              tvTemp.setTextColor(0xFFFFF3E0.toInt()) 
+         else ->
+              tvTemp.setTextColor(0xFFB0BEC5.toInt()) 
+      }
+
+             tvVoltage.text = "Voltage · ${info.voltageMv} mV"
+             tvLevelScale.text = "Level · ${info.level} / ${info.scale}"
+           
+            // ===== LAST UPDATED =====
             updateLastUpdated()
 
             // ===== PERCENT COLOR =====
