@@ -7,6 +7,7 @@ data class BatteryInfo(
     val health: String,
     val temperatureC: Float,
     val voltageMv: Int,
+    val currentMa: Int,
     val level: Int,
     val scale: Int
 )

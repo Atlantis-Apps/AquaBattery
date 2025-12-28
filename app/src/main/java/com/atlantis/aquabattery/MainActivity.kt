@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.atlantis.aquabattery.battery.BatteryParser
 import com.atlantis.aquabattery.battery.DrainEstimator
+import com.atlantis.aquabattery.battery.ChargeSpeed
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,17 +35,28 @@ class MainActivity : AppCompatActivity() {
 
     private val batteryReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent == null) return
+            if (intent == null || context == null) return
 
-            val info = BatteryParser.parse(intent)
+            // ✅ IMPORTANT: context is REQUIRED
+            val info = BatteryParser.parse(context, intent)
 
-            // ===== TEXT =====
+            // ===== PERCENT =====
             tvPercent.text =
                 if (info.percent >= 0) "${info.percent}%" else "—"
 
+            // ===== STATUS (CHARGE SPEED TEXT) =====
             tvStatus.text =
-                if (info.isCharging) "Charging" else "Discharging"
+    if (info.isCharging)
+        ChargeSpeed.label(
+            info.currentMa,
+            info.voltageMv,
+            info.plugType,
+            info.percent
+        )
+    else
+        "Discharging"
 
+            // ===== DETAILS =====
             tvSource.text = info.plugType
             tvHealth.text = "Health · ${info.health}"
             tvTemp.text = "Temp · ${info.temperatureC} °C"
@@ -53,15 +65,12 @@ class MainActivity : AppCompatActivity() {
 
             // ===== PERCENT COLOR =====
             when {
-                info.percent <= 15 -> {
-                    tvPercent.setTextColor(0xFFFFCDD2.toInt()) // soft red
-                }
-                info.percent <= 40 -> {
+                info.percent <= 15 ->
+                    tvPercent.setTextColor(0xFFFFCDD2.toInt()) // red
+                info.percent <= 40 ->
                     tvPercent.setTextColor(0xFFFFF3E0.toInt()) // amber
-                }
-                else -> {
+                else ->
                     tvPercent.setTextColor(0xFFFFFFFF.toInt()) // white
-                }
             }
 
             // ===== RING =====
@@ -70,20 +79,19 @@ class MainActivity : AppCompatActivity() {
             }
 
             // ===== HISTORY + GRAPH =====
-if (info.percent >= 0) {
-    historyStore.addPoint(info.percent)
+            if (info.percent >= 0) {
+                historyStore.addPoint(info.percent)
+                val history = historyStore.getPoints()
 
-    val history = historyStore.getPoints()
+                // Graph only needs %
+                batteryGraph.setData(history.map { it.second })
 
-    // Graph only needs percentages
-    batteryGraph.setData(history.map { it.second })
+                // Drain estimator needs timestamp + %
+                tvDrain.text =
+                    "Drain · ${DrainEstimator.estimate(history, info.isCharging)}"
+            }
 
-    // Drain estimator needs timestamp + percent
-    tvDrain.text =
-        "Drain · ${DrainEstimator.estimate(history, info.isCharging)}"
-}
-
-            // ===== CHARGING ANIMATION =====
+            // ===== CHARGING ICON =====
             setChargingAnimation(info.isCharging)
         }
     }
@@ -92,7 +100,7 @@ if (info.percent >= 0) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // ===== TOOLBAR (FOR ⋮ MENU) =====
+        // ===== TOOLBAR =====
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
@@ -107,7 +115,7 @@ if (info.percent >= 0) {
         tvDrain = findViewById(R.id.tvDrain)
         ivCharging = findViewById(R.id.ivCharging)
 
-        // Shadow so % always pops
+        // Percent shadow for readability
         tvPercent.setShadowLayer(
             6f,
             0f,
@@ -162,7 +170,7 @@ if (info.percent >= 0) {
         }
     }
 
-    // ===== ABOUT MENU =====
+    // ===== MENU =====
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         return true
