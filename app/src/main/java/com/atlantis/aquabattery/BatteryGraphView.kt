@@ -45,7 +45,7 @@ class BatteryGraphView @JvmOverloads constructor(
 
         // ===== SAFE DRAWING PADDING =====
         val paddingLeft = 60f
-        val paddingTop = 32f      
+        val paddingTop = 32f    
         val paddingBottom = 64f   
 
         val graphWidth = w - paddingLeft
