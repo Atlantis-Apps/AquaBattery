@@ -1,50 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="24dp">
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent"
+     android:background="@color/colorBackground"
+     android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal">
+    <androidx.appcompat.widget.Toolbar
+         android:layout_height="?attr/actionBarSize"
+         android:layout_width="match_parent"
+         android:background="@color/aqua_blue"
+         android:title="@string/app_name"
+         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+         android:id="@+id/toolbar" />
 
-        <ImageView
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            android:src="@mipmap/ic_launcher"
-            android:contentDescription="@string/app_name" />
+    <ScrollView
+         android:layout_height="match_parent"
+         android:layout_width="match_parent">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/app_name"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:gravity="center_horizontal"
+             android:padding="24dp"
+             android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Version 1.1"
-            android:textSize="14sp" />
+            <ImageView
+                 android:layout_height="72dp"
+                 android:layout_width="72dp"
+                 android:src="@mipmap/ic_launcher"
+                 android:contentDescription="@string/app_name" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="AquaBattery is a lightweight battery monitoring app focused on clarity, accuracy, and clean design."
-            android:textSize="14sp"
-            android:lineSpacingExtra="4dp" />
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 android:textSize="22sp"
+                 android:textColor="@android:color/white"
+                 android:layout_marginTop="12dp"
+                 android:text="@string/app_name"
+                 android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="© Atlantis"
-            android:textSize="12sp" />
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 android:textSize="14sp"
+                 android:textColor="#B0BEC5"
+                 android:layout_marginTop="4dp"
+                 android:id="@+id/tvVersion"
+                 android:text="Version" />
 
-    </LinearLayout>
-</ScrollView>
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:gravity="center"
+                 android:textSize="14sp"
+                 android:textColor="#CFD8DC"
+                 android:layout_marginTop="20dp"
+                 android:lineSpacingExtra="4dp"
+                 android:text="AquaBattery is a lightweight, modern battery monitoring app focused on clarity, accuracy, and clean design." />
+
+            <View
+                 android:layout_height="24dp"
+                 android:layout_width="match_parent" />
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 android:textSize="12sp"
+                 android:textColor="#78909C"
+                 android:text="© Atlantis" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>
