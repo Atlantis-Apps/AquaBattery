@@ -18,7 +18,6 @@ class BatteryRingView @JvmOverloads constructor(
     private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = 24f
-        color = 0x33000000
         strokeCap = Paint.Cap.ROUND
     }
 
@@ -48,11 +47,15 @@ class BatteryRingView @JvmOverloads constructor(
         this.percent = percent.coerceIn(0, 100)
         this.isCharging = charging
 
+        // 🔥 Progress ring colour (unchanged behaviour)
         ringPaint.color = when {
-            percent <= 15 -> 0xFFD32F2F.toInt() // red
-            percent <= 40 -> 0xFFF57C00.toInt() // orange
-            else -> 0xFF1976D2.toInt()          // blue
+            percent <= 15 -> context.getColor(R.color.battery_critical)
+            percent <= 40 -> context.getColor(R.color.ring_progress)
+            else -> context.getColor(R.color.battery_good)
         }
+
+        // 🔥 Background ring (outline) — GREY & MODE AWARE
+        bgPaint.color = context.getColor(R.color.ring_track)
 
         if (charging && !chargingAnimator.isRunning) {
             chargingAnimator.start()
@@ -71,7 +74,7 @@ class BatteryRingView @JvmOverloads constructor(
         val pad = 32f
         rect.set(pad, pad, size - pad, size - pad)
 
-        // background ring
+        // background ring (outline)
         canvas.drawArc(rect, 0f, 360f, false, bgPaint)
 
         // battery sweep

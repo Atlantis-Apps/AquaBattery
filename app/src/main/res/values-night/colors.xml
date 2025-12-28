@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- True dark -->
+    <color name="colorBackground">#000000</color>
+
+    <!-- Card surface -->
+    <color name="colorSurface">#181818</color>
+
+    <!-- Text -->
+    <color name="colorTextPrimary">#FFFFFF</color>
+    <color name="colorTextSecondary">#9E9E9E</color>
+
+    <!-- Divider -->
+    <color name="colorDivider">#2A2A2A</color>
+
+    <!-- Ring -->
+    <color name="ring_progress">#FB8C00</color> <!-- keep orange -->
+    <color name="ring_track">#2A2A2A</color>   <!-- dark grey -->
+    
+    <!-- Battery state colors -->
+    <color name="battery_good">#64B5F6</color>     <!-- softer blue -->
+    <color name="battery_critical">#EF5350</color> <!-- softer red -->
+</resources>

@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.AquaBattery" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowBackground">#F5FAFF</item>
-        <item name="colorPrimary">#1976D2</item>
-        <item name="colorAccent">#29B6F6</item>
+    <style name="Theme.AquaBattery"
+        parent="Theme.Material3.DayNight.NoActionBar">
+
+        <item name="android:windowBackground">
+            @color/colorBackground
+        </item>
+
+        <item name="android:textColorPrimary">
+            @color/colorTextPrimary
+        </item>
+
+        <item name="android:textColorSecondary">
+            @color/colorTextSecondary
+        </item>
+
     </style>
 
 </resources>

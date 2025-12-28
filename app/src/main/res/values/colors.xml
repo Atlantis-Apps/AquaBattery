@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- App background -->
+    <color name="colorBackground">#F5F9FF</color>
+
+    <!-- Card surface -->
+    <color name="colorSurface">#FFFFFF</color>
+
+    <!-- Text -->
+    <color name="colorTextPrimary">#212121</color>
+    <color name="colorTextSecondary">#607D8B</color>
+
+    <!-- Divider -->
+    <color name="colorDivider">#E0E0E0</color>
+
+    <!-- Ring -->
+    <color name="ring_progress">#FB8C00</color> <!-- orange -->
+    <color name="ring_track">#D6D6D6</color>   <!-- light grey -->
+   
+    <!-- Battery state colors -->
+    <color name="battery_good">#1976D2</color>     <!-- blue -->
+    <color name="battery_critical">#D32F2F</color> <!-- red -->
+</resources>
