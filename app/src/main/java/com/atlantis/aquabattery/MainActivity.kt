@@ -18,6 +18,7 @@ import com.atlantis.aquabattery.battery.BatteryParser
 import com.atlantis.aquabattery.battery.DrainEstimator
 import com.atlantis.aquabattery.battery.ChargeSpeedEstimator
 import com.atlantis.aquabattery.battery.TemperatureStatus
+import com.atlantis.aquabattery.battery.VoltageStability
 import kotlin.math.max
 
 class MainActivity : AppCompatActivity() {
@@ -49,37 +50,45 @@ class MainActivity : AppCompatActivity() {
             tvPercent.text =
                 if (info.percent >= 0) "${info.percent}%" else "—"
 
-            // ===== STATUS =====
+            // ===== STATUS (FEATURE 3) =====
             tvStatus.text =
-               if (info.isCharging)
-            ChargeSpeedEstimator.label(
-            historyStore.getPoints(),
-            info.isCharging
-        )
-    else
-        "Discharging"
+                if (info.isCharging)
+                    ChargeSpeedEstimator.label(
+                        historyStore.getPoints(),
+                        info.isCharging
+                    )
+                else
+                    "Discharging"
 
             // ===== DETAILS =====
             tvSource.text = info.plugType
             tvHealth.text = "Health · ${explainHealth(info.health)}"
 
-           // Temperature label + color
-          val tempLabel = TemperatureStatus.label(info.temperatureC)
-          tvTemp.text = "Temp · ${info.temperatureC} °C ($tempLabel)"
+            // ===== TEMPERATURE STATUS (FEATURE 4) =====
+            val tempLabel = TemperatureStatus.label(info.temperatureC)
+            tvTemp.text = "Temp · ${info.temperatureC} °C ($tempLabel)"
+            when (tempLabel) {
+                "Hot ⚠️" ->
+                    tvTemp.setTextColor(0xFFFFCDD2.toInt())
+                "Warm" ->
+                    tvTemp.setTextColor(0xFFFFF3E0.toInt())
+                else ->
+                    tvTemp.setTextColor(0xFFB0BEC5.toInt())
+            }
 
-         when (tempLabel) {
-           "Hot ⚠️" ->
-              tvTemp.setTextColor(0xFFFFCDD2.toInt())
-           "Warm" ->
-              tvTemp.setTextColor(0xFFFFF3E0.toInt()) 
-         else ->
-              tvTemp.setTextColor(0xFFB0BEC5.toInt()) 
-      }
+            // ===== VOLTAGE STABILITY (FEATURE 5) =====
+            val voltageLabel = VoltageStability.label(info.voltageMv)
+            tvVoltage.text = "Voltage · ${info.voltageMv} mV ($voltageLabel)"
+            when (voltageLabel) {
+                "Fluctuating ⚠️" ->
+                    tvVoltage.setTextColor(0xFFFFCDD2.toInt())
+                else ->
+                    tvVoltage.setTextColor(0xFFB0BEC5.toInt())
+            }
 
-             tvVoltage.text = "Voltage · ${info.voltageMv} mV"
-             tvLevelScale.text = "Level · ${info.level} / ${info.scale}"
-           
-            // ===== LAST UPDATED =====
+            tvLevelScale.text = "Level · ${info.level} / ${info.scale}"
+
+            // ===== LAST UPDATED (FEATURE 2) =====
             updateLastUpdated()
 
             // ===== PERCENT COLOR =====
@@ -97,7 +106,7 @@ class MainActivity : AppCompatActivity() {
                 batteryRing.setBatteryState(info.percent, info.isCharging)
             }
 
-            // ===== HISTORY + GRAPH =====
+            // ===== HISTORY + DRAIN (FEATURE 6 READY) =====
             if (info.percent >= 0) {
                 historyStore.addPoint(info.percent)
                 val history = historyStore.getPoints()
@@ -187,7 +196,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ===== HEALTH EXPLANATION =====
+    // ===== FEATURE 1: HEALTH EXPLANATION =====
     private fun explainHealth(raw: String): String {
         return when (raw) {
             "Good" -> "Good (Normal wear)"
@@ -198,7 +207,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ===== LAST UPDATED =====
+    // ===== FEATURE 2: LAST UPDATED =====
     private fun updateLastUpdated() {
         val now = SystemClock.elapsedRealtime()
         val diff = if (lastUpdateTime == 0L) 0 else (now - lastUpdateTime) / 1000
