@@ -7,7 +7,10 @@
     <!-- Others -->
     <color name="aqua_blue">#000000</color>
     <color name="graph_baseline">#263238</color>
-    
+    <color name="about_text_primary">#FFFFFF</color>
+    <color name="about_text_secondary">#B0B0B0</color>
+    <color name="about_divider">#333333</color>
+  
     <!-- Card surface -->
     <color name="colorSurface">#181818</color>
 

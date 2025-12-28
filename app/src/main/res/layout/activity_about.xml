@@ -1,74 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-     xmlns:android="http://schemas.android.com/apk/res/android"
-     android:layout_height="match_parent"
-     android:layout_width="match_parent"
-     android:background="@color/colorBackground"
-     android:orientation="vertical">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorBackground">
 
+    <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
-         android:layout_height="?attr/actionBarSize"
-         android:layout_width="match_parent"
-         android:background="@color/aqua_blue"
-         android:title="@string/app_name"
-         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-         android:id="@+id/toolbar" />
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorBackground"
+        android:title="About"
+        android:titleTextColor="@color/about_text_primary"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
 
     <ScrollView
-         android:layout_height="match_parent"
-         android:layout_width="match_parent">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <LinearLayout
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:gravity="center_horizontal"
-             android:padding="24dp"
-             android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:padding="28dp">
 
+            <!-- App Icon -->
             <ImageView
-                 android:layout_height="72dp"
-                 android:layout_width="72dp"
-                 android:src="@mipmap/ic_launcher"
-                 android:contentDescription="@string/app_name" />
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@mipmap/ic_launcher"
+                android:contentDescription="@string/app_name"
+                android:layout_marginTop="12dp" />
 
+            <!-- App Name -->
             <TextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:textSize="22sp"
-                 android:textColor="@android:color/white"
-                 android:layout_marginTop="12dp"
-                 android:text="@string/app_name"
-                 android:textStyle="bold" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/about_text_primary"
+                android:layout_marginTop="16dp" />
 
+            <!-- Version -->
             <TextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:textSize="14sp"
-                 android:textColor="#B0BEC5"
-                 android:layout_marginTop="4dp"
-                 android:id="@+id/tvVersion"
-                 android:text="Version" />
+                android:id="@+id/tvVersion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Version 1.1"
+                android:textSize="14sp"
+                android:textColor="@color/about_text_secondary"
+                android:layout_marginTop="6dp" />
 
-            <TextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="match_parent"
-                 android:gravity="center"
-                 android:textSize="14sp"
-                 android:textColor="#CFD8DC"
-                 android:layout_marginTop="20dp"
-                 android:lineSpacingExtra="4dp"
-                 android:text="AquaBattery is a lightweight, modern battery monitoring app focused on clarity, accuracy, and clean design." />
-
+            <!-- Divider -->
             <View
-                 android:layout_height="24dp"
-                 android:layout_width="match_parent" />
+                android:layout_width="48dp"
+                android:layout_height="2dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:background="@color/about_divider" />
 
+            <!-- Description -->
             <TextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:textSize="12sp"
-                 android:textColor="#78909C"
-                 android:text="© Atlantis" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="AquaBattery is a lightweight, modern battery monitoring app focused on clarity, accuracy, and clean design."
+                android:textSize="15sp"
+                android:textColor="@color/about_text_secondary"
+                android:gravity="center"
+                android:lineSpacingExtra="4dp" />
+
+            <!-- Footer -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="© Atlantis"
+                android:textSize="12sp"
+                android:textColor="@color/about_text_secondary"
+                android:layout_marginTop="32dp" />
 
         </LinearLayout>
 
