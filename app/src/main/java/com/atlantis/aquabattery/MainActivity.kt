@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -15,7 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.atlantis.aquabattery.battery.BatteryParser
 import com.atlantis.aquabattery.battery.DrainEstimator
-import com.atlantis.aquabattery.battery.ChargeSpeed
+import kotlin.math.max
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,15 +28,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvVoltage: TextView
     private lateinit var tvLevelScale: TextView
     private lateinit var tvDrain: TextView
+    private lateinit var tvLastUpdated: TextView
     private lateinit var ivCharging: ImageView
 
     private lateinit var batteryRing: BatteryRingView
     private lateinit var batteryGraph: BatteryGraphView
     private lateinit var historyStore: BatteryHistoryStore
 
+    private var lastUpdateTime = 0L
+
     private val batteryReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent == null || context == null) return
+            if (context == null || intent == null) return
 
             val info = BatteryParser.parse(context, intent)
 
@@ -43,17 +47,9 @@ class MainActivity : AppCompatActivity() {
             tvPercent.text =
                 if (info.percent >= 0) "${info.percent}%" else "—"
 
-            // ===== STATUS (CHARGE SPEED) =====
+            // ===== STATUS =====
             tvStatus.text =
-                if (info.isCharging)
-                    ChargeSpeed.label(
-                        info.currentMa,
-                        info.voltageMv,
-                        info.plugType,
-                        info.percent
-                    )
-                else
-                    "Discharging"
+                if (info.isCharging) "Charging" else "Discharging"
 
             // ===== DETAILS =====
             tvSource.text = info.plugType
@@ -61,6 +57,9 @@ class MainActivity : AppCompatActivity() {
             tvTemp.text = "Temp · ${info.temperatureC} °C"
             tvVoltage.text = "Voltage · ${info.voltageMv} mV"
             tvLevelScale.text = "Level · ${info.level} / ${info.scale}"
+
+            // ===== LAST UPDATED (Feature 2) =====
+            updateLastUpdated()
 
             // ===== PERCENT COLOR =====
             when {
@@ -110,9 +109,9 @@ class MainActivity : AppCompatActivity() {
         tvVoltage = findViewById(R.id.tvVoltage)
         tvLevelScale = findViewById(R.id.tvLevelScale)
         tvDrain = findViewById(R.id.tvDrain)
+        tvLastUpdated = findViewById(R.id.tvLastUpdated)
         ivCharging = findViewById(R.id.ivCharging)
 
-        // Percent shadow for readability
         tvPercent.setShadowLayer(
             6f,
             0f,
@@ -167,15 +166,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ===== FEATURE 1: HEALTH EXPLANATION =====
-    private fun explainHealth(rawHealth: String): String {
-        return when (rawHealth) {
+    // ===== HEALTH EXPLANATION =====
+    private fun explainHealth(raw: String): String {
+        return when (raw) {
             "Good" -> "Good (Normal wear)"
-            "Overheating" -> "Fair (Thermal stress)"
-            "Cold" -> "Fair (Cold conditions)"
-            "Over voltage" -> "Fair (Voltage irregularity)"
+            "Overheating" -> "Poor (Overheating)"
             "Dead" -> "Poor (Consider replacement)"
-            else -> "Unknown"
+            "Cold" -> "Fair (Cold battery)"
+            else -> raw
+        }
+    }
+
+    // ===== LAST UPDATED =====
+    private fun updateLastUpdated() {
+        val now = SystemClock.elapsedRealtime()
+        val diff = if (lastUpdateTime == 0L) 0 else (now - lastUpdateTime) / 1000
+        lastUpdateTime = now
+
+        tvLastUpdated.text = when {
+            diff <= 5 -> "Updated just now"
+            diff < 60 -> "Updated ${diff}s ago"
+            else -> "Updated ${max(1, diff / 60)} min ago"
         }
     }
 
