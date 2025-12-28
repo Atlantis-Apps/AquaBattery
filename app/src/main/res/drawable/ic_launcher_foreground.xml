@@ -1,0 +1,46 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Battery body (wider + taller) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="
+            M22,40
+            h56
+            v26
+            h-56
+            z" />
+
+    <!-- Battery cap (slightly bigger) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="
+            M78,46
+            h8
+            v14
+            h-8
+            z" />
+
+    <!-- Inner battery area -->
+    <path
+        android:fillColor="#0D47A1"
+        android:pathData="
+            M26,44
+            h48
+            v18
+            h-48
+            z" />
+
+    <!-- Aqua fill (level bar) -->
+    <path
+        android:fillColor="#64B5F6"
+        android:pathData="
+            M26,52
+            h32
+            v10
+            h-32
+            z" />
+</vector>
