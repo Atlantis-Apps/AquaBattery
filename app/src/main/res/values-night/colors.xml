@@ -3,7 +3,11 @@
 
     <!-- True dark -->
     <color name="colorBackground">#000000</color>
-
+   
+    <!-- Others -->
+    <color name="aqua_blue">#000000</color>
+    <color name="graph_baseline">#263238</color>
+    
     <!-- Card surface -->
     <color name="colorSurface">#181818</color>
 

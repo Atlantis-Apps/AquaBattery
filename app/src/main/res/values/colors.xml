@@ -3,7 +3,11 @@
 
     <!-- App background -->
     <color name="colorBackground">#F5F9FF</color>
-
+    
+    <!-- Other -->
+    <color name="aqua_blue">#1976D2</color>
+    <color name="graph_baseline">#263238</color>
+    
     <!-- Card surface -->
     <color name="colorSurface">#FFFFFF</color>
 

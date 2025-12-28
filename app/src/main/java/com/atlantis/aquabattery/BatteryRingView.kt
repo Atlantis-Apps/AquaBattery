@@ -17,14 +17,16 @@ class BatteryRingView @JvmOverloads constructor(
 
     private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = 24f
+        strokeWidth = 18f
         strokeCap = Paint.Cap.ROUND
+        isDither = true
     }
 
     private val ringPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = 24f
+        strokeWidth = 18f
         strokeCap = Paint.Cap.ROUND
+        isDither = true
     }
 
     private val rect = RectF()
@@ -34,7 +36,7 @@ class BatteryRingView @JvmOverloads constructor(
     private var animOffset = 0f
 
     private val chargingAnimator = ValueAnimator.ofFloat(0f, 360f).apply {
-        duration = 2000
+        duration = 2800 // smoother
         repeatCount = ValueAnimator.INFINITE
         interpolator = LinearInterpolator()
         addUpdateListener {
@@ -47,14 +49,14 @@ class BatteryRingView @JvmOverloads constructor(
         this.percent = percent.coerceIn(0, 100)
         this.isCharging = charging
 
-        // 🔥 Progress ring colour (unchanged behaviour)
+        // Progress ring colour
         ringPaint.color = when {
             percent <= 15 -> context.getColor(R.color.battery_critical)
             percent <= 40 -> context.getColor(R.color.ring_progress)
             else -> context.getColor(R.color.battery_good)
         }
 
-        // 🔥 Background ring (outline) — GREY & MODE AWARE
+        // Background ring (neutral track)
         bgPaint.color = context.getColor(R.color.ring_track)
 
         if (charging && !chargingAnimator.isRunning) {
@@ -71,13 +73,14 @@ class BatteryRingView @JvmOverloads constructor(
         super.onDraw(canvas)
 
         val size = min(width, height).toFloat()
-        val pad = 32f
+
+        val pad = ringPaint.strokeWidth / 2f + 2f
         rect.set(pad, pad, size - pad, size - pad)
 
-        // background ring (outline)
+        // Background ring
         canvas.drawArc(rect, 0f, 360f, false, bgPaint)
 
-        // battery sweep
+        // Progress sweep
         val sweep = 360f * (percent / 100f)
         val startAngle = if (isCharging) -90f + animOffset else -90f
 

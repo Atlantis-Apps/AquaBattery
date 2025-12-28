@@ -5,11 +5,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import com.atlantis.aquabattery.battery.BatteryParser
 import com.atlantis.aquabattery.battery.DrainEstimator
 
@@ -67,14 +70,18 @@ class MainActivity : AppCompatActivity() {
             }
 
             // ===== HISTORY + GRAPH =====
-            if (info.percent >= 0) {
-                historyStore.addPoint(info.percent)
-                val history = historyStore.getPoints()
-                batteryGraph.setData(history)
+if (info.percent >= 0) {
+    historyStore.addPoint(info.percent)
 
-                tvDrain.text =
-                    "Drain · ${DrainEstimator.estimate(history, info.isCharging)}"
-            }
+    val history = historyStore.getPoints()
+
+    // Graph only needs percentages
+    batteryGraph.setData(history.map { it.second })
+
+    // Drain estimator needs timestamp + percent
+    tvDrain.text =
+        "Drain · ${DrainEstimator.estimate(history, info.isCharging)}"
+}
 
             // ===== CHARGING ANIMATION =====
             setChargingAnimation(info.isCharging)
@@ -85,6 +92,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // ===== TOOLBAR (FOR ⋮ MENU) =====
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
+        // ===== VIEWS =====
         tvPercent = findViewById(R.id.tvPercent)
         tvStatus = findViewById(R.id.tvStatus)
         tvSource = findViewById(R.id.tvSource)
@@ -95,7 +107,7 @@ class MainActivity : AppCompatActivity() {
         tvDrain = findViewById(R.id.tvDrain)
         ivCharging = findViewById(R.id.ivCharging)
 
-        // shadow so % always pops
+        // Shadow so % always pops
         tvPercent.setShadowLayer(
             6f,
             0f,
@@ -147,6 +159,22 @@ class MainActivity : AppCompatActivity() {
         } else {
             ivCharging.animate().cancel()
             ivCharging.visibility = View.GONE
+        }
+    }
+
+    // ===== ABOUT MENU =====
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_about -> {
+                startActivity(Intent(this, AboutActivity::class.java))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 }
