@@ -14,12 +14,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import com.atlantis.aquabattery.battery.BatteryParser
-import com.atlantis.aquabattery.battery.DrainEstimator
-import com.atlantis.aquabattery.battery.ChargeSpeedEstimator
-import com.atlantis.aquabattery.battery.TemperatureStatus
-import com.atlantis.aquabattery.battery.VoltageStability
-import kotlin.math.max
+import com.atlantis.aquabattery.battery.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvLevelScale: TextView
     private lateinit var tvDrain: TextView
     private lateinit var tvLastUpdated: TextView
+    private lateinit var tvTimeRemaining: TextView
     private lateinit var ivCharging: ImageView
 
     private lateinit var batteryRing: BatteryRingView
@@ -47,10 +43,9 @@ class MainActivity : AppCompatActivity() {
             val info = BatteryParser.parse(context, intent)
 
             // ===== PERCENT =====
-            tvPercent.text =
-                if (info.percent >= 0) "${info.percent}%" else "—"
+            tvPercent.text = if (info.percent >= 0) "${info.percent}%" else "—"
 
-            // ===== STATUS (FEATURE 3) =====
+            // ===== STATUS =====
             tvStatus.text =
                 if (info.isCharging)
                     ChargeSpeedEstimator.label(
@@ -60,35 +55,28 @@ class MainActivity : AppCompatActivity() {
                 else
                     "Discharging"
 
-            // ===== DETAILS =====
+            // ===== SOURCE =====
             tvSource.text = info.plugType
+
+            // ===== HEALTH =====
             tvHealth.text = "Health · ${explainHealth(info.health)}"
 
-            // ===== TEMPERATURE STATUS (FEATURE 4) =====
+            // ===== TEMPERATURE =====
             val tempLabel = TemperatureStatus.label(info.temperatureC)
             tvTemp.text = "Temp · ${info.temperatureC} °C ($tempLabel)"
             when (tempLabel) {
-                "Hot ⚠️" ->
-                    tvTemp.setTextColor(0xFFFFCDD2.toInt())
-                "Warm" ->
-                    tvTemp.setTextColor(0xFFFFF3E0.toInt())
-                else ->
-                    tvTemp.setTextColor(0xFFB0BEC5.toInt())
+                "Hot ⚠️" -> tvTemp.setTextColor(0xFFFFCDD2.toInt())
+                "Warm" -> tvTemp.setTextColor(0xFFFFF3E0.toInt())
+                else -> tvTemp.setTextColor(0xFFB0BEC5.toInt())
             }
 
-            // ===== VOLTAGE STABILITY (FEATURE 5) =====
-            val voltageLabel = VoltageStability.label(info.voltageMv)
-            tvVoltage.text = "Voltage · ${info.voltageMv} mV ($voltageLabel)"
-            when (voltageLabel) {
-                "Fluctuating ⚠️" ->
-                    tvVoltage.setTextColor(0xFFFFCDD2.toInt())
-                else ->
-                    tvVoltage.setTextColor(0xFFB0BEC5.toInt())
-            }
+            // ===== VOLTAGE =====
+            tvVoltage.text = "Voltage · ${info.voltageMv} mV"
 
+            // ===== LEVEL =====
             tvLevelScale.text = "Level · ${info.level} / ${info.scale}"
 
-            // ===== LAST UPDATED (FEATURE 2) =====
+            // ===== LAST UPDATED =====
             updateLastUpdated()
 
             // ===== PERCENT COLOR =====
@@ -106,15 +94,20 @@ class MainActivity : AppCompatActivity() {
                 batteryRing.setBatteryState(info.percent, info.isCharging)
             }
 
-            // ===== HISTORY + DRAIN (FEATURE 6 READY) =====
+            // ===== HISTORY + GRAPH =====
             if (info.percent >= 0) {
                 historyStore.addPoint(info.percent)
                 val history = historyStore.getPoints()
 
                 batteryGraph.setData(history.map { it.second })
 
+                // Feature 6 – session drain
                 tvDrain.text =
                     "Drain · ${DrainEstimator.estimate(history, info.isCharging)}"
+
+                // Feature 7 – time to empty
+                tvTimeRemaining.text =
+                    TimeRemainingEstimator.estimate(history, info.isCharging)
             }
 
             // ===== CHARGING ICON =====
@@ -127,8 +120,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // ===== TOOLBAR =====
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
 
         // ===== VIEWS =====
         tvPercent = findViewById(R.id.tvPercent)
@@ -140,13 +132,11 @@ class MainActivity : AppCompatActivity() {
         tvLevelScale = findViewById(R.id.tvLevelScale)
         tvDrain = findViewById(R.id.tvDrain)
         tvLastUpdated = findViewById(R.id.tvLastUpdated)
+        tvTimeRemaining = findViewById(R.id.tvTimeRemaining)
         ivCharging = findViewById(R.id.ivCharging)
 
         tvPercent.setShadowLayer(
-            6f,
-            0f,
-            2f,
-            0x55000000.toInt()
+            6f, 0f, 2f, 0x55000000.toInt()
         )
 
         batteryRing = findViewById(R.id.batteryRing)
@@ -184,9 +174,7 @@ class MainActivity : AppCompatActivity() {
                     ivCharging.animate()
                         .alpha(0.3f)
                         .setDuration(800)
-                        .withEndAction {
-                            setChargingAnimation(true)
-                        }
+                        .withEndAction { setChargingAnimation(true) }
                         .start()
                 }
                 .start()
@@ -196,18 +184,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ===== FEATURE 1: HEALTH EXPLANATION =====
-    private fun explainHealth(raw: String): String {
-        return when (raw) {
+    // ===== HEALTH EXPLANATION (FEATURE 1) =====
+    private fun explainHealth(raw: String): String =
+        when (raw) {
             "Good" -> "Good (Normal wear)"
             "Overheating" -> "Poor (Overheating)"
             "Dead" -> "Poor (Consider replacement)"
             "Cold" -> "Fair (Cold battery)"
             else -> raw
         }
-    }
 
-    // ===== FEATURE 2: LAST UPDATED =====
+    // ===== LAST UPDATED (FEATURE 2) =====
     private fun updateLastUpdated() {
         val now = SystemClock.elapsedRealtime()
         val diff = if (lastUpdateTime == 0L) 0 else (now - lastUpdateTime) / 1000
@@ -216,7 +203,7 @@ class MainActivity : AppCompatActivity() {
         tvLastUpdated.text = when {
             diff <= 5 -> "Updated just now"
             diff < 60 -> "Updated ${diff}s ago"
-            else -> "Updated ${max(1, diff / 60)} min ago"
+            else -> "Updated ${diff / 60} min ago"
         }
     }
 
@@ -226,13 +213,12 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        when (item.itemId) {
             R.id.action_about -> {
                 startActivity(Intent(this, AboutActivity::class.java))
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
 }
