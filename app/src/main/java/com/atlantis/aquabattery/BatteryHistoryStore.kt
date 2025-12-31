@@ -1,35 +1,51 @@
 package com.atlantis.aquabattery
 
 import android.content.Context
+import android.os.SystemClock
 
 class BatteryHistoryStore(context: Context) {
 
     private val prefs =
         context.getSharedPreferences("battery_history", Context.MODE_PRIVATE)
 
+    /**
+     * Stores (elapsedRealtimeMs -> percent)
+     */
     fun addPoint(percent: Int) {
-        val time = System.currentTimeMillis()
-        prefs.edit().putInt(time.toString(), percent).apply()
+        val time = SystemClock.elapsedRealtime()
+        prefs.edit()
+            .putInt(time.toString(), percent)
+            .apply()
         trimOld()
     }
 
+    /**
+     * Returns sorted list of (timeMs, percent)
+     */
     fun getPoints(): List<Pair<Long, Int>> {
         return prefs.all
-            .mapNotNull {
-                val t = it.key.toLongOrNull()
-                val p = it.value as? Int
+            .mapNotNull { entry ->
+                val t = entry.key.toLongOrNull()
+                val p = entry.value as? Int
                 if (t != null && p != null) t to p else null
             }
             .sortedBy { it.first }
     }
 
+    /**
+     * Keep only last 24h of ELAPSED time
+     */
     private fun trimOld() {
-        val cutoff = System.currentTimeMillis() - (24 * 60 * 60 * 1000)
+        val cutoff = SystemClock.elapsedRealtime() - (24 * 60 * 60 * 1000)
         val editor = prefs.edit()
-        prefs.all.keys.forEach {
-            val time = it.toLongOrNull() ?: return@forEach
-            if (time < cutoff) editor.remove(it)
+
+        prefs.all.keys.forEach { key ->
+            val time = key.toLongOrNull() ?: return@forEach
+            if (time < cutoff) {
+                editor.remove(key)
+            }
         }
+
         editor.apply()
     }
 }

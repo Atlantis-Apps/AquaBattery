@@ -14,7 +14,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import com.atlantis.aquabattery.battery.*
+import com.atlantis.aquabattery.battery.BatteryParser
+import com.atlantis.aquabattery.battery.TemperatureStatus
+import kotlin.math.max
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,7 +29,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvLevelScale: TextView
     private lateinit var tvDrain: TextView
     private lateinit var tvLastUpdated: TextView
-    private lateinit var tvTimeRemaining: TextView
     private lateinit var ivCharging: ImageView
 
     private lateinit var batteryRing: BatteryRingView
@@ -42,73 +43,41 @@ class MainActivity : AppCompatActivity() {
 
             val info = BatteryParser.parse(context, intent)
 
-            // ===== PERCENT =====
-            tvPercent.text = if (info.percent >= 0) "${info.percent}%" else "—"
-
-            // ===== STATUS =====
-            tvStatus.text =
-                if (info.isCharging)
-                    ChargeSpeedEstimator.label(
-                        historyStore.getPoints(),
-                        info.isCharging
-                    )
-                else
-                    "Discharging"
-
-            // ===== SOURCE =====
+            // ===== BASIC =====
+            tvPercent.text = "${info.percent}%"
+            tvStatus.text = if (info.isCharging) "Charging" else "Discharging"
             tvSource.text = info.plugType
-
-            // ===== HEALTH =====
             tvHealth.text = "Health · ${explainHealth(info.health)}"
+            tvVoltage.text = "Voltage · ${info.voltageMv} mV"
+            tvLevelScale.text = "Level · ${info.level} / ${info.scale}"
 
             // ===== TEMPERATURE =====
             val tempLabel = TemperatureStatus.label(info.temperatureC)
             tvTemp.text = "Temp · ${info.temperatureC} °C ($tempLabel)"
-            when (tempLabel) {
-                "Hot ⚠️" -> tvTemp.setTextColor(0xFFFFCDD2.toInt())
-                "Warm" -> tvTemp.setTextColor(0xFFFFF3E0.toInt())
-                else -> tvTemp.setTextColor(0xFFB0BEC5.toInt())
-            }
+            tvTemp.setTextColor(
+                when (tempLabel) {
+                    "Hot ⚠️" -> 0xFFFFCDD2.toInt()
+                    "Warm" -> 0xFFFFF3E0.toInt()
+                    else -> 0xFFB0BEC5.toInt()
+                }
+            )
 
-            // ===== VOLTAGE =====
-            tvVoltage.text = "Voltage · ${info.voltageMv} mV"
-
-            // ===== LEVEL =====
-            tvLevelScale.text = "Level · ${info.level} / ${info.scale}"
-
-            // ===== LAST UPDATED =====
-            updateLastUpdated()
-
-            // ===== PERCENT COLOR =====
-            when {
-                info.percent <= 15 ->
-                    tvPercent.setTextColor(0xFFFFCDD2.toInt())
-                info.percent <= 40 ->
-                    tvPercent.setTextColor(0xFFFFF3E0.toInt())
-                else ->
-                    tvPercent.setTextColor(0xFFFFFFFF.toInt())
+            // ===== DRAIN (STATE ONLY) =====
+            tvDrain.text = when {
+                info.isCharging -> "Drain · Charging"
+                else -> "Drain · Stable"
             }
 
             // ===== RING =====
-            if (info.percent >= 0) {
-                batteryRing.setBatteryState(info.percent, info.isCharging)
-            }
+            batteryRing.setBatteryState(info.percent, info.isCharging)
 
             // ===== HISTORY + GRAPH =====
-            if (info.percent >= 0) {
-                historyStore.addPoint(info.percent)
-                val history = historyStore.getPoints()
+            historyStore.addPoint(info.percent)
+            val history = historyStore.getPoints()
+            batteryGraph.setData(history.map { it.second })
 
-                batteryGraph.setData(history.map { it.second })
-
-                // Feature 6 – session drain
-                tvDrain.text =
-                    "Drain · ${DrainEstimator.estimate(history, info.isCharging)}"
-
-                // Feature 7 – time to empty
-                tvTimeRemaining.text =
-                    TimeRemainingEstimator.estimate(history, info.isCharging)
-            }
+            // ===== LAST UPDATED =====
+            updateLastUpdated()
 
             // ===== CHARGING ICON =====
             setChargingAnimation(info.isCharging)
@@ -119,10 +88,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // ===== TOOLBAR =====
         setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
 
-        // ===== VIEWS =====
         tvPercent = findViewById(R.id.tvPercent)
         tvStatus = findViewById(R.id.tvStatus)
         tvSource = findViewById(R.id.tvSource)
@@ -132,12 +99,7 @@ class MainActivity : AppCompatActivity() {
         tvLevelScale = findViewById(R.id.tvLevelScale)
         tvDrain = findViewById(R.id.tvDrain)
         tvLastUpdated = findViewById(R.id.tvLastUpdated)
-        tvTimeRemaining = findViewById(R.id.tvTimeRemaining)
         ivCharging = findViewById(R.id.ivCharging)
-
-        tvPercent.setShadowLayer(
-            6f, 0f, 2f, 0x55000000.toInt()
-        )
 
         batteryRing = findViewById(R.id.batteryRing)
         batteryGraph = findViewById(R.id.batteryGraph)
@@ -160,23 +122,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun setChargingAnimation(charging: Boolean) {
         if (charging) {
-            if (ivCharging.visibility != View.VISIBLE) {
-                ivCharging.visibility = View.VISIBLE
-                ivCharging.alpha = 0f
-            }
-
+            ivCharging.visibility = View.VISIBLE
             ivCharging.animate().cancel()
+            ivCharging.alpha = 1f
             ivCharging.animate()
-                .alpha(1f)
-                .setDuration(800)
+                .alpha(0.3f)
+                .setDuration(900)
                 .setInterpolator(AccelerateDecelerateInterpolator())
-                .withEndAction {
-                    ivCharging.animate()
-                        .alpha(0.3f)
-                        .setDuration(800)
-                        .withEndAction { setChargingAnimation(true) }
-                        .start()
-                }
+                .withEndAction { setChargingAnimation(true) }
                 .start()
         } else {
             ivCharging.animate().cancel()
@@ -184,17 +137,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ===== HEALTH EXPLANATION (FEATURE 1) =====
     private fun explainHealth(raw: String): String =
         when (raw) {
             "Good" -> "Good (Normal wear)"
             "Overheating" -> "Poor (Overheating)"
-            "Dead" -> "Poor (Consider replacement)"
+            "Dead" -> "Poor (Replace battery)"
             "Cold" -> "Fair (Cold battery)"
             else -> raw
         }
 
-    // ===== LAST UPDATED (FEATURE 2) =====
     private fun updateLastUpdated() {
         val now = SystemClock.elapsedRealtime()
         val diff = if (lastUpdateTime == 0L) 0 else (now - lastUpdateTime) / 1000
@@ -203,11 +154,10 @@ class MainActivity : AppCompatActivity() {
         tvLastUpdated.text = when {
             diff <= 5 -> "Updated just now"
             diff < 60 -> "Updated ${diff}s ago"
-            else -> "Updated ${diff / 60} min ago"
+            else -> "Updated ${max(1, diff / 60)} min ago"
         }
     }
 
-    // ===== MENU =====
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         return true

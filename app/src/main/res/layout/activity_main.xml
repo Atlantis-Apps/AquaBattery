@@ -148,16 +148,6 @@
                     android:textColor="#607D8B"
                     android:paddingTop="12dp" />
 
-                <!-- ✅ FIXED -->
-                <TextView
-                    android:id="@+id/tvTimeRemaining"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="—"
-                    android:textSize="13sp"
-                    android:textColor="#90A4AE"
-                    android:layout_marginTop="4dp" />
-
                 <TextView
                     android:id="@+id/tvLastUpdated"
                     android:layout_width="wrap_content"
@@ -170,13 +160,15 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/tvGraphLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
                 android:layout_marginBottom="6dp"
-                android:text="Battery usage"
-                android:textSize="14sp"
-                android:textColor="#90A4AE" />
+                android:text="Session history"
+                android:textSize="13sp"
+                android:textColor="#90A4AE"
+                android:textStyle="bold" />
 
             <com.atlantis.aquabattery.BatteryGraphView
                 android:id="@+id/batteryGraph"
