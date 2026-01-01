@@ -11,10 +11,12 @@ import android.view.MenuItem
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
+import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.atlantis.aquabattery.battery.BatteryParser
+import com.atlantis.aquabattery.battery.DrainEstimator
 import com.atlantis.aquabattery.battery.TemperatureStatus
 import kotlin.math.max
 
@@ -30,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvDrain: TextView
     private lateinit var tvLastUpdated: TextView
     private lateinit var ivCharging: ImageView
+    private lateinit var switchSmoothGraph: Switch
 
     private lateinit var batteryRing: BatteryRingView
     private lateinit var batteryGraph: BatteryGraphView
@@ -43,43 +46,26 @@ class MainActivity : AppCompatActivity() {
 
             val info = BatteryParser.parse(context, intent)
 
-            // ===== BASIC =====
             tvPercent.text = "${info.percent}%"
             tvStatus.text = if (info.isCharging) "Charging" else "Discharging"
             tvSource.text = info.plugType
             tvHealth.text = "Health · ${explainHealth(info.health)}"
+
+            val tempLabel = TemperatureStatus.label(info.temperatureC)
+            tvTemp.text = "Temp · ${info.temperatureC} °C ($tempLabel)"
+
             tvVoltage.text = "Voltage · ${info.voltageMv} mV"
             tvLevelScale.text = "Level · ${info.level} / ${info.scale}"
 
-            // ===== TEMPERATURE =====
-            val tempLabel = TemperatureStatus.label(info.temperatureC)
-            tvTemp.text = "Temp · ${info.temperatureC} °C ($tempLabel)"
-            tvTemp.setTextColor(
-                when (tempLabel) {
-                    "Hot ⚠️" -> 0xFFFFCDD2.toInt()
-                    "Warm" -> 0xFFFFF3E0.toInt()
-                    else -> 0xFFB0BEC5.toInt()
-                }
-            )
-
-            // ===== DRAIN (STATE ONLY) =====
-            tvDrain.text = when {
-                info.isCharging -> "Drain · Charging"
-                else -> "Drain · Stable"
-            }
-
-            // ===== RING =====
             batteryRing.setBatteryState(info.percent, info.isCharging)
 
-            // ===== HISTORY + GRAPH =====
             historyStore.addPoint(info.percent)
             val history = historyStore.getPoints()
             batteryGraph.setData(history.map { it.second })
 
-            // ===== LAST UPDATED =====
-            updateLastUpdated()
+            tvDrain.text = "Drain · ${DrainEstimator.estimate(history, info.isCharging)}"
 
-            // ===== CHARGING ICON =====
+            updateLastUpdated()
             setChargingAnimation(info.isCharging)
         }
     }
@@ -100,19 +86,21 @@ class MainActivity : AppCompatActivity() {
         tvDrain = findViewById(R.id.tvDrain)
         tvLastUpdated = findViewById(R.id.tvLastUpdated)
         ivCharging = findViewById(R.id.ivCharging)
+        switchSmoothGraph = findViewById(R.id.switchSmoothGraph)
 
         batteryRing = findViewById(R.id.batteryRing)
         batteryGraph = findViewById(R.id.batteryGraph)
 
         historyStore = BatteryHistoryStore(this)
+
+        switchSmoothGraph.setOnCheckedChangeListener { _, enabled ->
+            batteryGraph.setSmoothEnabled(enabled)
+        }
     }
 
     override fun onStart() {
         super.onStart()
-        registerReceiver(
-            batteryReceiver,
-            IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-        )
+        registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
     }
 
     override fun onStop() {
@@ -124,7 +112,6 @@ class MainActivity : AppCompatActivity() {
         if (charging) {
             ivCharging.visibility = View.VISIBLE
             ivCharging.animate().cancel()
-            ivCharging.alpha = 1f
             ivCharging.animate()
                 .alpha(0.3f)
                 .setDuration(900)
@@ -141,7 +128,7 @@ class MainActivity : AppCompatActivity() {
         when (raw) {
             "Good" -> "Good (Normal wear)"
             "Overheating" -> "Poor (Overheating)"
-            "Dead" -> "Poor (Replace battery)"
+            "Dead" -> "Poor (Consider replacement)"
             "Cold" -> "Fair (Cold battery)"
             else -> raw
         }

@@ -1,38 +1,33 @@
 package com.atlantis.aquabattery
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import kotlin.math.max
-import kotlin.math.min
 
 class BatteryGraphView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : View(context, attrs) {
 
-    private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = context.getColor(R.color.aqua_blue)
-        strokeWidth = 4f
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.CYAN
+        strokeWidth = 5f
         style = Paint.Style.STROKE
-        strokeCap = Paint.Cap.ROUND
-        strokeJoin = Paint.Join.ROUND
-        isDither = true
-    }
-
-    private val baselinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = context.getColor(R.color.graph_baseline)
-        strokeWidth = 1.5f
     }
 
     private val path = Path()
     private var data: List<Int> = emptyList()
+    private var smoothEnabled = true
 
-    fun setData(points: List<Int>) {
-        data = points
+    fun setData(values: List<Int>) {
+        data = values
+        invalidate()
+    }
+
+    fun setSmoothEnabled(enabled: Boolean) {
+        smoothEnabled = enabled
         invalidate()
     }
 
@@ -41,38 +36,34 @@ class BatteryGraphView @JvmOverloads constructor(
 
         if (data.size < 2) return
 
+        val maxVal = 100f
         val w = width.toFloat()
         val h = height.toFloat()
-        val pad = 20f
-
-        val usableWidth = w - pad * 2
-        val usableHeight = h - pad * 2
-
-        // ===== BASELINE (100%) =====
-        canvas.drawLine(
-            pad,
-            pad,
-            w - pad,
-            pad,
-            baselinePaint
-        )
-
-        val stepX = usableWidth / (data.size - 1)
 
         path.reset()
 
-        data.forEachIndexed { index, value ->
-            val x = pad + stepX * index
-            val clamped = value.coerceIn(0, 100)
-            val y = pad + usableHeight * (1f - clamped / 100f)
+        val stepX = w / max(1, data.size - 1)
 
-            if (index == 0) {
-                path.moveTo(x, y)
+        var prevX = 0f
+        var prevY = h - (data[0] / maxVal) * h
+        path.moveTo(prevX, prevY)
+
+        for (i in 1 until data.size) {
+            val x = i * stepX
+            val y = h - (data[i] / maxVal) * h
+
+            if (smoothEnabled) {
+                val midX = (prevX + x) / 2f
+                val midY = (prevY + y) / 2f
+                path.quadTo(prevX, prevY, midX, midY)
             } else {
                 path.lineTo(x, y)
             }
+
+            prevX = x
+            prevY = y
         }
 
-        canvas.drawPath(path, linePaint)
+        canvas.drawPath(path, paint)
     }
 }
