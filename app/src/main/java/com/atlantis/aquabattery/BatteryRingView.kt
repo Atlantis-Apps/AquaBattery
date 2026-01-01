@@ -15,33 +15,30 @@ class BatteryRingView @JvmOverloads constructor(
     attrs: AttributeSet? = null
 ) : View(context, attrs) {
 
-    // ===== LOW BATTERY STATE =====
+    // ===== STATE =====
+    private var percent = 0
+    private var isCharging = false
     private var isLowBattery = false
+    private var animOffset = 0f
     private var pulseAnimator: ValueAnimator? = null
-
-    private val baseStroke = 18f
-
-    private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeWidth = baseStroke
-        strokeCap = Paint.Cap.ROUND
-        isDither = true
-        color = context.getColor(R.color.ring_track)
-    }
-
-    private val ringPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeWidth = baseStroke
-        strokeCap = Paint.Cap.ROUND
-        isDither = true
-        color = context.getColor(R.color.battery_good)
-    }
 
     private val rect = RectF()
 
-    private var percent = 0
-    private var isCharging = false
-    private var animOffset = 0f
+    // ===== BACKGROUND TRACK =====
+    private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeWidth = 18f
+        strokeCap = Paint.Cap.ROUND
+        color = context.getColor(R.color.ring_track)
+    }
+
+    // ===== PROGRESS RING =====
+    private val ringPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeWidth = 18f
+        strokeCap = Paint.Cap.ROUND
+        isDither = true
+    }
 
     // ===== CHARGING ROTATION =====
     private val chargingAnimator = ValueAnimator.ofFloat(0f, 360f).apply {
@@ -58,13 +55,12 @@ class BatteryRingView @JvmOverloads constructor(
     private fun startLowBatteryPulse() {
         if (pulseAnimator != null) return
 
-        pulseAnimator = ValueAnimator.ofFloat(baseStroke - 4f, baseStroke + 6f).apply {
+        pulseAnimator = ValueAnimator.ofFloat(0.85f, 1f).apply {
             duration = 900
             repeatMode = ValueAnimator.REVERSE
             repeatCount = ValueAnimator.INFINITE
             addUpdateListener {
-                ringPaint.strokeWidth = it.animatedValue as Float
-                invalidate()
+                alpha = it.animatedValue as Float
             }
             start()
         }
@@ -73,8 +69,7 @@ class BatteryRingView @JvmOverloads constructor(
     private fun stopLowBatteryPulse() {
         pulseAnimator?.cancel()
         pulseAnimator = null
-        ringPaint.strokeWidth = baseStroke
-        invalidate()
+        alpha = 1f
     }
 
     // ===== PUBLIC API =====
@@ -84,25 +79,50 @@ class BatteryRingView @JvmOverloads constructor(
 
         val low = this.percent <= 15
 
-        // ---- LOW BATTERY HANDLING ----
+        // ----- LOW BATTERY -----
         if (low && !isLowBattery) {
             isLowBattery = true
             ringPaint.color = context.getColor(R.color.battery_critical)
+            ringPaint.setShadowLayer(
+                22f,
+                0f,
+                0f,
+                context.getColor(R.color.battery_critical)
+            )
             startLowBatteryPulse()
-        } else if (!low && isLowBattery) {
-            isLowBattery = false
-            stopLowBatteryPulse()
         }
 
-        // ---- NORMAL COLOR LOGIC ----
+        // ----- EXIT LOW BATTERY -----
+        if (!low && isLowBattery) {
+            isLowBattery = false
+            stopLowBatteryPulse()
+            ringPaint.clearShadowLayer()
+        }
+
+        // ----- NORMAL / CHARGING COLORS -----
         if (!isLowBattery) {
-            ringPaint.color = when {
-                percent <= 40 -> context.getColor(R.color.ring_progress)
-                else -> context.getColor(R.color.battery_good)
+            when {
+                charging -> {
+                    ringPaint.color = context.getColor(R.color.battery_good)
+                    ringPaint.setShadowLayer(
+                        18f,
+                        0f,
+                        0f,
+                        context.getColor(R.color.battery_good)
+                    )
+                }
+                percent <= 40 -> {
+                    ringPaint.color = context.getColor(R.color.ring_progress)
+                    ringPaint.clearShadowLayer()
+                }
+                else -> {
+                    ringPaint.color = context.getColor(R.color.battery_good)
+                    ringPaint.clearShadowLayer()
+                }
             }
         }
 
-        // ---- CHARGING ROTATION ----
+        // ----- CHARGING ROTATION -----
         if (charging && !chargingAnimator.isRunning) {
             chargingAnimator.start()
         } else if (!charging && chargingAnimator.isRunning) {
@@ -120,10 +140,10 @@ class BatteryRingView @JvmOverloads constructor(
         val pad = ringPaint.strokeWidth / 2f + 2f
         rect.set(pad, pad, size - pad, size - pad)
 
-        // Background ring
+        // Background track
         canvas.drawArc(rect, 0f, 360f, false, bgPaint)
 
-        // Progress ring
+        // Progress arc
         val sweep = 360f * (percent / 100f)
         val startAngle = if (isCharging) -90f + animOffset else -90f
         canvas.drawArc(rect, startAngle, sweep, false, ringPaint)

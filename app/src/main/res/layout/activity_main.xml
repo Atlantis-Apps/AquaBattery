@@ -40,35 +40,36 @@
                 android:fitsSystemWindows="true">
 
                 <FrameLayout
-                    android:layout_width="200dp"
-                    android:layout_height="200dp">
+    android:layout_width="200dp"
+    android:layout_height="200dp">
 
-                    <com.atlantis.aquabattery.BatteryRingView
-                        android:id="@+id/batteryRing"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+    <com.atlantis.aquabattery.BatteryRingView
+        android:id="@+id/batteryRing"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layerType="software" />
 
-                    <TextView
-                        android:id="@+id/tvPercent"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="100%"
-                        android:textSize="52sp"
-                        android:textStyle="bold"
-                        android:textColor="#FFFFFF"
-                        android:letterSpacing="0.02" />
+    <TextView
+        android:id="@+id/tvPercent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="100%"
+        android:textSize="52sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:letterSpacing="0.02" />
 
-                    <ImageView
-                        android:id="@+id/ivCharging"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:layout_gravity="center|bottom"
-                        android:layout_marginBottom="28dp"
-                        android:src="@drawable/ic_bolt"
-                        android:visibility="gone" />
+    <ImageView
+        android:id="@+id/ivCharging"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center|bottom"
+        android:layout_marginBottom="28dp"
+        android:src="@drawable/ic_bolt"
+        android:visibility="gone" />
 
-                </FrameLayout>
+</FrameLayout>
 
                 <TextView
                     android:id="@+id/tvStatus"
