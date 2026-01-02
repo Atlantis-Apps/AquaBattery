@@ -40,4 +40,7 @@
     <color name="green_400">#A5D6A7</color>
     <color name="gray_700">#BDBDBD</color>
 
+    <!-- Graph -->
+    <color name="graph_line">#FFFFFF</color> 
+    <color name="graph_line_cb">#B0BEC5</color> 
 </resources>

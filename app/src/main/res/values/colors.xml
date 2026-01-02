@@ -39,4 +39,8 @@
     <color name="red_400">#EF5350</color>    
     <color name="green_400">#66BB6A</color>  
     <color name="gray_700">#616161</color>   
+
+    <!-- Graph -->
+    <color name="graph_line">#1976D2</color> 
+    <color name="graph_line_cb">#455A64</color> 
 </resources>
