@@ -30,10 +30,10 @@
     <color name="ring_track">#2A2A2A</color>   
 
     <!-- Battery state -->
-    <color name="battery_good">#64B5F6</color>
+    <color name="battery_good">#64B5F6</color>     
     <color name="battery_critical">#EF5350</color> 
 
-    <!-- ACCESSIBILITY / COLOR-BLIND SAFE  -->
+    <!-- ACCESSIBILITY / COLOR-BLIND SAFE -->
     <color name="blue_400">#90CAF9</color>
     <color name="orange_400">#FFCC80</color>
     <color name="red_400">#EF9A9A</color>

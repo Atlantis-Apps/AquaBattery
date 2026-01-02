@@ -40,11 +40,11 @@ class MainActivity : AppCompatActivity() {
 
     private var lastUpdateTime = 0L
 
-    // ===== COLOR-BLIND MODE =====
-    private var colorBlindMode = false
     private val prefs by lazy {
         getSharedPreferences("ui_prefs", Context.MODE_PRIVATE)
     }
+
+    private var colorBlindMode = false
 
     private val batteryReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -69,7 +69,8 @@ class MainActivity : AppCompatActivity() {
             val history = historyStore.getPoints()
             batteryGraph.setData(history.map { it.second })
 
-            tvDrain.text = "Drain · ${DrainEstimator.estimate(history, info.isCharging)}"
+            tvDrain.text =
+                "Drain · ${DrainEstimator.estimate(history, info.isCharging)}"
 
             updateLastUpdated()
             setChargingAnimation(info.isCharging)
@@ -99,20 +100,27 @@ class MainActivity : AppCompatActivity() {
 
         historyStore = BatteryHistoryStore(this)
 
-        // Smooth graph toggle
-        switchSmoothGraph.setOnCheckedChangeListener { _, enabled ->
-            batteryGraph.setSmoothEnabled(enabled)
-        }
-
-        // Apply color-blind mode
+        val smoothEnabled = prefs.getBoolean("smooth_graph", true)
         colorBlindMode = prefs.getBoolean("color_blind", false)
+
+        switchSmoothGraph.isChecked = smoothEnabled
+        batteryGraph.setSmoothEnabled(smoothEnabled)
+
         batteryRing.setColorBlindMode(colorBlindMode)
         batteryGraph.setColorBlindMode(colorBlindMode)
+
+        switchSmoothGraph.setOnCheckedChangeListener { _, enabled ->
+            batteryGraph.setSmoothEnabled(enabled)
+            prefs.edit().putBoolean("smooth_graph", enabled).apply()
+        }
     }
 
     override fun onStart() {
         super.onStart()
-        registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        registerReceiver(
+            batteryReceiver,
+            IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        )
     }
 
     override fun onStop() {
@@ -147,7 +155,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateLastUpdated() {
         val now = SystemClock.elapsedRealtime()
-        val diff = if (lastUpdateTime == 0L) 0 else (now - lastUpdateTime) / 1000
+        val diff =
+            if (lastUpdateTime == 0L) 0 else (now - lastUpdateTime) / 1000
         lastUpdateTime = now
 
         tvLastUpdated.text = when {
