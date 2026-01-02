@@ -3,14 +3,18 @@
 
     <!-- True dark -->
     <color name="colorBackground">#000000</color>
-   
-    <!-- Others -->
+
+    <!-- Brand / accents -->
     <color name="aqua_blue">#000000</color>
+
+    <!-- Graph -->
     <color name="graph_baseline">#263238</color>
+
+    <!-- About / misc text -->
     <color name="about_text_primary">#FFFFFF</color>
     <color name="about_text_secondary">#B0B0B0</color>
     <color name="about_divider">#333333</color>
-  
+
     <!-- Card surface -->
     <color name="colorSurface">#181818</color>
 
@@ -22,10 +26,18 @@
     <color name="colorDivider">#2A2A2A</color>
 
     <!-- Ring -->
-    <color name="ring_progress">#FB8C00</color> <!-- keep orange -->
-    <color name="ring_track">#2A2A2A</color>   <!-- dark grey -->
-    
-    <!-- Battery state colors -->
-    <color name="battery_good">#64B5F6</color>     <!-- softer blue -->
-    <color name="battery_critical">#EF5350</color> <!-- softer red -->
+    <color name="ring_progress">#FB8C00</color> 
+    <color name="ring_track">#2A2A2A</color>   
+
+    <!-- Battery state -->
+    <color name="battery_good">#64B5F6</color>
+    <color name="battery_critical">#EF5350</color> 
+
+    <!-- ACCESSIBILITY / COLOR-BLIND SAFE  -->
+    <color name="blue_400">#90CAF9</color>
+    <color name="orange_400">#FFCC80</color>
+    <color name="red_400">#EF9A9A</color>
+    <color name="green_400">#A5D6A7</color>
+    <color name="gray_700">#BDBDBD</color>
+
 </resources>

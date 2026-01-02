@@ -40,6 +40,12 @@ class MainActivity : AppCompatActivity() {
 
     private var lastUpdateTime = 0L
 
+    // ===== COLOR-BLIND MODE =====
+    private var colorBlindMode = false
+    private val prefs by lazy {
+        getSharedPreferences("ui_prefs", Context.MODE_PRIVATE)
+    }
+
     private val batteryReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (context == null || intent == null) return
@@ -93,9 +99,15 @@ class MainActivity : AppCompatActivity() {
 
         historyStore = BatteryHistoryStore(this)
 
+        // Smooth graph toggle
         switchSmoothGraph.setOnCheckedChangeListener { _, enabled ->
             batteryGraph.setSmoothEnabled(enabled)
         }
+
+        // Apply color-blind mode
+        colorBlindMode = prefs.getBoolean("color_blind", false)
+        batteryRing.setColorBlindMode(colorBlindMode)
+        batteryGraph.setColorBlindMode(colorBlindMode)
     }
 
     override fun onStart() {
@@ -147,15 +159,32 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
+        menu.findItem(R.id.action_color_blind)?.isChecked = colorBlindMode
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
+
+            R.id.action_color_blind -> {
+                colorBlindMode = !item.isChecked
+                item.isChecked = colorBlindMode
+
+                prefs.edit()
+                    .putBoolean("color_blind", colorBlindMode)
+                    .apply()
+
+                batteryRing.setColorBlindMode(colorBlindMode)
+                batteryGraph.setColorBlindMode(colorBlindMode)
+
+                true
+            }
+
             R.id.action_about -> {
                 startActivity(Intent(this, AboutActivity::class.java))
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
 }

@@ -3,14 +3,18 @@
 
     <!-- App background -->
     <color name="colorBackground">#F5F9FF</color>
-    
-    <!-- Other -->
+
+    <!-- Primary / Brand -->
     <color name="aqua_blue">#1976D2</color>
+
+    <!-- Graph -->
     <color name="graph_baseline">#263238</color>
+
+    <!-- About / misc text -->
     <color name="about_text_primary">#111111</color>
     <color name="about_text_secondary">#666666</color>
     <color name="about_divider">#CCCCCC</color>
-   
+
     <!-- Card surface -->
     <color name="colorSurface">#FFFFFF</color>
 
@@ -22,10 +26,18 @@
     <color name="colorDivider">#E0E0E0</color>
 
     <!-- Ring -->
-    <color name="ring_progress">#FB8C00</color> <!-- orange -->
-    <color name="ring_track">#D6D6D6</color>   <!-- light grey -->
-   
-    <!-- Battery state colors -->
-    <color name="battery_good">#1976D2</color>     <!-- blue -->
-    <color name="battery_critical">#D32F2F</color> <!-- red -->
+    <color name="ring_progress">#FB8C00</color>
+    <color name="ring_track">#D6D6D6</color>   
+
+    <!-- Battery state -->
+    <color name="battery_good">#1976D2</color>     
+    <color name="battery_critical">#D32F2F</color> 
+
+    <!-- ACCESSIBILITY / COLOR-BLIND SAFE -->
+    <color name="blue_400">#42A5F5</color> 
+    <color name="orange_400">#FFA726</color> 
+    <color name="red_400">#EF5350</color>    
+    <color name="green_400">#66BB6A</color>  
+    <color name="gray_700">#616161</color>   
+    
 </resources>

@@ -12,7 +12,7 @@ class BatteryGraphView @JvmOverloads constructor(
 ) : View(context, attrs) {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.CYAN
+        color = context.getColor(R.color.ring_progress)
         strokeWidth = 5f
         style = Paint.Style.STROKE
     }
@@ -21,6 +21,9 @@ class BatteryGraphView @JvmOverloads constructor(
     private var data: List<Int> = emptyList()
     private var smoothEnabled = true
 
+    // ===== COLOR BLIND MODE =====
+    private var colorBlindMode = false
+
     fun setData(values: List<Int>) {
         data = values
         invalidate()
@@ -28,6 +31,16 @@ class BatteryGraphView @JvmOverloads constructor(
 
     fun setSmoothEnabled(enabled: Boolean) {
         smoothEnabled = enabled
+        invalidate()
+    }
+
+    fun setColorBlindMode(enabled: Boolean) {
+        colorBlindMode = enabled
+        paint.color = if (enabled) {
+            context.getColor(R.color.blue_400)
+        } else {
+            context.getColor(R.color.ring_progress)
+        }
         invalidate()
     }
 

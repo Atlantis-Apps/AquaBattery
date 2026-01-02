@@ -2,6 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/action_color_blind"
+        android:title="Color-blind mode"
+        android:checkable="true"
+        android:showAsAction="never" />
+    
+    <item
         android:id="@+id/action_about"
         android:title="About"
         android:showAsAction="never" />
