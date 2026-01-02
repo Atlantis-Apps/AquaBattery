@@ -4,9 +4,12 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import android.view.animation.DecelerateInterpolator
+import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 
 class BatteryGraphView @JvmOverloads constructor(
     context: Context,
@@ -18,6 +21,8 @@ class BatteryGraphView @JvmOverloads constructor(
     private var colorBlindMode = false
     private var drawProgress = 1f
 
+    private var touchIndex: Int? = null
+
     private val graphPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         strokeWidth = 5f
         style = Paint.Style.STROKE
@@ -28,6 +33,17 @@ class BatteryGraphView @JvmOverloads constructor(
         color = context.getColor(R.color.graph_baseline)
         alpha = 40
         strokeWidth = 2f
+    }
+
+    private val indicatorPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        strokeWidth = 2f
+        color = context.getColor(R.color.colorTextSecondary)
+    }
+
+    private val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        textSize = 32f
+        textAlign = Paint.Align.CENTER
+        color = context.getColor(R.color.colorTextPrimary)
     }
 
     private val path = Path()
@@ -59,6 +75,30 @@ class BatteryGraphView @JvmOverloads constructor(
         }
     }
 
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (data.size < 2) return false
+
+        when (event.action) {
+            MotionEvent.ACTION_DOWN,
+            MotionEvent.ACTION_MOVE -> {
+                val index = ((event.x / width) * data.size)
+                    .toInt()
+                    .coerceIn(0, data.size - 1)
+
+                touchIndex = index
+                invalidate()
+                return true
+            }
+
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> {
+                touchIndex = null
+                invalidate()
+            }
+        }
+        return super.onTouchEvent(event)
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
@@ -70,11 +110,11 @@ class BatteryGraphView @JvmOverloads constructor(
 
         drawGrid(canvas, w, h)
 
-        graphPaint.color = if (colorBlindMode) {
-            context.getColor(R.color.graph_line_cb)
-        } else {
-            context.getColor(R.color.graph_line)
-        }
+        graphPaint.color =
+            if (colorBlindMode)
+                context.getColor(R.color.battery_good)
+            else
+                context.getColor(R.color.aqua_blue)
 
         path.reset()
 
@@ -101,6 +141,15 @@ class BatteryGraphView @JvmOverloads constructor(
         }
 
         canvas.drawPath(path, graphPaint)
+
+        touchIndex?.let { index ->
+            val x = index * stepX
+            val value = data[index]
+            val y = h - (value / maxVal) * h
+
+            canvas.drawLine(x, 0f, x, h, indicatorPaint)
+            canvas.drawText("$value%", x, max(32f, y - 16f), labelPaint)
+        }
     }
 
     private fun drawGrid(canvas: Canvas, w: Float, h: Float) {
